@@ -1,0 +1,814 @@
+{
+  "components": {
+    "schemas": {
+      "AssetSummary": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "mimeType": {
+            "title": "Mimetype",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "mimeType",
+          "size"
+        ],
+        "title": "AssetSummary",
+        "type": "object"
+      },
+      "CatalogResponse": {
+        "properties": {
+          "catalogRevision": {
+            "title": "Catalogrevision",
+            "type": "integer"
+          },
+          "songs": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogSong"
+            },
+            "title": "Songs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "catalogRevision",
+          "songs"
+        ],
+        "title": "CatalogResponse",
+        "type": "object"
+      },
+      "CatalogSong": {
+        "properties": {
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
+          "chartCount": {
+            "title": "Chartcount",
+            "type": "integer"
+          },
+          "groupName": {
+            "title": "Groupname",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "previewLength": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previewlength"
+          },
+          "previewStart": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previewstart"
+          },
+          "subtitle": {
+            "title": "Subtitle",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle",
+          "artist",
+          "groupName",
+          "previewStart",
+          "previewLength",
+          "chartCount"
+        ],
+        "title": "CatalogSong",
+        "type": "object"
+      },
+      "ChartResponse": {
+        "properties": {
+          "credit": {
+            "title": "Credit",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "difficulty": {
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "meter": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meter"
+          },
+          "noteData": {
+            "title": "Notedata",
+            "type": "string"
+          },
+          "songId": {
+            "title": "Songid",
+            "type": "string"
+          },
+          "stepType": {
+            "title": "Steptype",
+            "type": "string"
+          },
+          "timing": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Timing",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "stepType",
+          "difficulty",
+          "meter",
+          "credit",
+          "description",
+          "songId",
+          "timing",
+          "noteData"
+        ],
+        "title": "ChartResponse",
+        "type": "object"
+      },
+      "ChartSummary": {
+        "properties": {
+          "credit": {
+            "title": "Credit",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "difficulty": {
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "meter": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meter"
+          },
+          "stepType": {
+            "title": "Steptype",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "stepType",
+          "difficulty",
+          "meter",
+          "credit",
+          "description"
+        ],
+        "title": "ChartSummary",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "catalogRevision": {
+            "title": "Catalogrevision",
+            "type": "integer"
+          },
+          "errorCount": {
+            "title": "Errorcount",
+            "type": "integer"
+          },
+          "lastScanAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastscanat"
+          },
+          "lastScanDurationMs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastscandurationms"
+          },
+          "lastScanStatus": {
+            "title": "Lastscanstatus",
+            "type": "string"
+          },
+          "scanStartedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scanstartedat"
+          },
+          "songCount": {
+            "title": "Songcount",
+            "type": "integer"
+          },
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalogRevision",
+          "lastScanAt",
+          "lastScanStatus",
+          "songCount",
+          "errorCount",
+          "lastScanDurationMs",
+          "scanStartedAt",
+          "status",
+          "version"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "ScanErrorResponse": {
+        "properties": {
+          "errorCode": {
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "observedAt": {
+            "title": "Observedat",
+            "type": "string"
+          },
+          "relativePath": {
+            "title": "Relativepath",
+            "type": "string"
+          }
+        },
+        "required": [
+          "relativePath",
+          "errorCode",
+          "message",
+          "observedAt"
+        ],
+        "title": "ScanErrorResponse",
+        "type": "object"
+      },
+      "ScanErrorsResponse": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ScanErrorResponse"
+            },
+            "title": "Errors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors"
+        ],
+        "title": "ScanErrorsResponse",
+        "type": "object"
+      },
+      "ScanResponse": {
+        "properties": {
+          "catalogRevision": {
+            "title": "Catalogrevision",
+            "type": "integer"
+          },
+          "changed": {
+            "title": "Changed",
+            "type": "boolean"
+          },
+          "errorCount": {
+            "title": "Errorcount",
+            "type": "integer"
+          },
+          "scanDurationMs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scandurationms"
+          },
+          "songCount": {
+            "title": "Songcount",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "changed",
+          "catalogRevision",
+          "songCount",
+          "errorCount",
+          "scanDurationMs"
+        ],
+        "title": "ScanResponse",
+        "type": "object"
+      },
+      "ServerResponse": {
+        "properties": {
+          "apiVersion": {
+            "const": "v1",
+            "title": "Apiversion",
+            "type": "string"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "catalogRevision": {
+            "title": "Catalogrevision",
+            "type": "integer"
+          },
+          "errorCount": {
+            "title": "Errorcount",
+            "type": "integer"
+          },
+          "lastScanAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastscanat"
+          },
+          "lastScanDurationMs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastscandurationms"
+          },
+          "lastScanStatus": {
+            "title": "Lastscanstatus",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scanStartedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scanstartedat"
+          },
+          "songCount": {
+            "title": "Songcount",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalogRevision",
+          "lastScanAt",
+          "lastScanStatus",
+          "songCount",
+          "errorCount",
+          "lastScanDurationMs",
+          "scanStartedAt",
+          "name",
+          "version",
+          "apiVersion",
+          "capabilities"
+        ],
+        "title": "ServerResponse",
+        "type": "object"
+      },
+      "SongResponse": {
+        "properties": {
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/AssetSummary"
+            },
+            "title": "Assets",
+            "type": "array"
+          },
+          "charts": {
+            "items": {
+              "$ref": "#/components/schemas/ChartSummary"
+            },
+            "title": "Charts",
+            "type": "array"
+          },
+          "groupName": {
+            "title": "Groupname",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "previewLength": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previewlength"
+          },
+          "previewStart": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previewstart"
+          },
+          "subtitle": {
+            "title": "Subtitle",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle",
+          "artist",
+          "groupName",
+          "previewStart",
+          "previewLength",
+          "charts",
+          "assets"
+        ],
+        "title": "SongResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "FoxDroid Content Server",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/admin/scan": {
+      "post": {
+        "operationId": "trigger_scan_api_v1_admin_scan_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Trigger Scan"
+      }
+    },
+    "/api/v1/admin/scan-errors": {
+      "get": {
+        "operationId": "scan_errors_api_v1_admin_scan_errors_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanErrorsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Scan Errors"
+      }
+    },
+    "/api/v1/assets/{asset_id}": {
+      "get": {
+        "operationId": "asset_api_v1_assets__asset_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "title": "Asset Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "206": {
+            "description": "Requested byte range"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Asset"
+      }
+    },
+    "/api/v1/catalog": {
+      "get": {
+        "operationId": "catalog_api_v1_catalog_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "304": {
+            "description": "Catalog revision is unchanged"
+          }
+        },
+        "summary": "Catalog"
+      }
+    },
+    "/api/v1/charts/{chart_id}": {
+      "get": {
+        "operationId": "chart_api_v1_charts__chart_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chart_id",
+            "required": true,
+            "schema": {
+              "title": "Chart Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChartResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Chart"
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/api/v1/server": {
+      "get": {
+        "operationId": "server_info_api_v1_server_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Server Info"
+      }
+    },
+    "/api/v1/songs/{song_id}": {
+      "get": {
+        "operationId": "song_api_v1_songs__song_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "song_id",
+            "required": true,
+            "schema": {
+              "title": "Song Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Song"
+      }
+    }
+  }
+}

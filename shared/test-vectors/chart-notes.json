@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "name": "tap-hold-roll-mine",
+      "chart": {
+        "timing": {
+          "BPMS": "0=120",
+          "OFFSET": "0"
+        },
+        "noteData": "1000\n0200\n00M0\n0004\n0000\n0300\n0000\n0003"
+      },
+      "expected": [
+        { "lane": 0, "beat": 0, "time": 0, "type": "tap" },
+        { "lane": 1, "beat": 0.5, "time": 0.25, "type": "hold", "endBeat": 2.5, "endTime": 1.25 },
+        { "lane": 2, "beat": 1, "time": 0.5, "type": "mine" },
+        { "lane": 3, "beat": 1.5, "time": 0.75, "type": "roll", "endBeat": 3.5, "endTime": 1.75 }
+      ]
+    },
+    {
+      "name": "offset-and-warp-filtering",
+      "chart": {
+        "timing": {
+          "BPMS": "0=120",
+          "OFFSET": "-0.125",
+          "WARPS": "1=2"
+        },
+        "noteData": "1000\n0100\n00M0\n0001"
+      },
+      "expected": [
+        { "lane": 0, "beat": 0, "time": 0.125, "type": "tap" },
+        { "lane": 3, "beat": 3, "time": 0.625, "type": "tap" }
+      ]
+    }
+  ]
+}

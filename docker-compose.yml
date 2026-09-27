@@ -1,0 +1,17 @@
+services:
+  foxdroid-server:
+    build:
+      context: ./server
+    image: foxdroid/server:dev
+    ports:
+      - "8080:8080"
+    environment:
+      FOXDROID_LIBRARY_PATH: /library
+      FOXDROID_DATA_PATH: /data
+      FOXDROID_SERVER_NAME: FoxDroid Home
+      FOXDROID_SCAN_ON_START: "true"
+    volumes:
+      - ./library:/library:ro
+      - ./server/data:/data
+    restart: unless-stopped
+
