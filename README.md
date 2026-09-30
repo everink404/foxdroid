@@ -7,6 +7,7 @@ FoxDroid 是一个面向家庭局域网的 StepMania 兼容节奏游戏项目。
 ## 项目资料
 
 - [当前进展与后续规划](docs/PROJECT_STATUS.md)
+- [验收清单](docs/ACCEPTANCE_CHECKLIST.md)
 - [产品需求](docs/PRD.md)
 - [技术路线](docs/TECHNICAL_ROUTE.md)
 - [开发规划](docs/DEVELOPMENT_PLAN.md)

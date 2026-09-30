@@ -11,3 +11,4 @@ server/library/
 data/
 library/
 .env
+.siyuan.local.json
