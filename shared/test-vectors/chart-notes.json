@@ -31,6 +31,57 @@
         { "lane": 0, "beat": 0, "time": 0.125, "type": "tap" },
         { "lane": 3, "beat": 3, "time": 0.625, "type": "tap" }
       ]
+    },
+    {
+      "name": "positive-offset-four-beat-chart",
+      "chart": {
+        "timing": { "BPMS": "0=120", "OFFSET": "0.125" },
+        "noteData": "1000\n0100\n0010\n0001"
+      },
+      "expected": [
+        { "lane": 0, "beat": 0, "time": -0.125, "type": "tap" },
+        { "lane": 1, "beat": 1, "time": 0.375, "type": "tap" },
+        { "lane": 2, "beat": 2, "time": 0.875, "type": "tap" },
+        { "lane": 3, "beat": 3, "time": 1.375, "type": "tap" }
+      ]
+    },
+    {
+      "name": "bpm-change-stop-and-delay",
+      "chart": {
+        "timing": {
+          "BPMS": "0=120,4=240",
+          "STOPS": "2=0.25",
+          "DELAYS": "6=0.5"
+        },
+        "noteData": "1000\n0100\n0010\n0001,1000\n0100\n0010\n0001"
+      },
+      "expected": [
+        { "lane": 0, "beat": 0, "time": 0, "type": "tap" },
+        { "lane": 1, "beat": 1, "time": 0.5, "type": "tap" },
+        { "lane": 2, "beat": 2, "time": 1.25, "type": "tap" },
+        { "lane": 3, "beat": 3, "time": 1.75, "type": "tap" },
+        { "lane": 0, "beat": 4, "time": 2.25, "type": "tap" },
+        { "lane": 1, "beat": 5, "time": 2.5, "type": "tap" },
+        { "lane": 2, "beat": 6, "time": 3.25, "type": "tap" },
+        { "lane": 3, "beat": 7, "time": 3.5, "type": "tap" }
+      ]
+    },
+    {
+      "name": "pause-inside-warp-and-resume",
+      "chart": {
+        "timing": {
+          "BPMS": "0=120",
+          "WARPS": "2=1.5",
+          "STOPS": "3=0.5"
+        },
+        "noteData": "1000\n0100\n0010\n0001,1000\n0000\n0000\n0000"
+      },
+      "expected": [
+        { "lane": 0, "beat": 0, "time": 0, "type": "tap" },
+        { "lane": 1, "beat": 1, "time": 0.5, "type": "tap" },
+        { "lane": 3, "beat": 3, "time": 1.5, "type": "tap" },
+        { "lane": 0, "beat": 4, "time": 1.75, "type": "tap" }
+      ]
     }
   ]
 }
