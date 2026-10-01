@@ -33,6 +33,22 @@ docker compose up --build
 
 Open `http://localhost:8080/`. The library is mounted read-only and the generated database is stored under `server/data`.
 
+## Run the published image
+
+Pull `montequilla/foxdroid:0.1.0` from Docker Hub, mount your song library at
+`/library` read-only and a writable data directory at `/data`, and publish port
+`8080`. The image includes the API and Web client. For example, from the project
+root on Linux or macOS:
+
+```shell
+mkdir -p library server/data
+docker run --name foxdroid -p 8080:8080 \
+  -v "$PWD/library:/library:ro" -v "$PWD/server/data:/data" \
+  montequilla/foxdroid:0.1.0
+```
+
+Open `http://localhost:8080/` after the server starts.
+
 ## Run for development
 
 ```shell

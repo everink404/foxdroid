@@ -1,0 +1,79 @@
+name: Docker image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/docker-image.yml
+      - server/Dockerfile
+      - server/.dockerignore
+      - server/pyproject.toml
+      - server/README.md
+      - server/src/**
+      - server/tests/**
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Docker Hub image tag
+        required: true
+        default: 0.1.0
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test server
+        run: |
+          python -m pip install './server[dev]'
+          python -m pytest server/tests
+          python -m ruff check server/src server/tests
+          node --test server/tests/web_core.test.mjs
+      - name: Build and smoke test image
+        run: |
+          docker build -t foxdroid-smoke:ci ./server
+          docker run -d --name foxdroid-smoke -p 127.0.0.1:18080:8080 foxdroid-smoke:ci
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18080/api/v1/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs foxdroid-smoke
+          exit 1
+      - name: Validate release settings
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          IMAGE_TAG: ${{ inputs.tag }}
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Tag must be a semantic version such as 0.1.0'; exit 1; }
+          test -n "$DOCKERHUB_USERNAME" || { echo 'Set the DOCKERHUB_USERNAME repository variable'; exit 1; }
+          test -n "$DOCKERHUB_TOKEN" || { echo 'Set the DOCKERHUB_TOKEN repository secret'; exit 1; }
+      - name: Set up QEMU
+        if: github.event_name == 'workflow_dispatch'
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Buildx
+        if: github.event_name == 'workflow_dispatch'
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to Docker Hub
+        if: github.event_name == 'workflow_dispatch'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and publish
+        if: github.event_name == 'workflow_dispatch'
+        uses: docker/build-push-action@v7
+        with:
+          context: ./server
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/foxdroid:${{ inputs.tag }}
