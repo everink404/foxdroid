@@ -1,5 +1,19 @@
 # FoxDroid A0 真机验收包
 
+## 最新 A1 导入验收版
+
+[下载 A1 APK](./foxdroid-a1-20261004-debug.apk?raw=true) ·
+[下载原创测试曲包](./original-tone-test.zip?raw=true)
+
+版本 0.2.0-a1 / versionCode 2，可覆盖安装 A0。
+SHA-256：`4a5f9c1746cbc43b941b3bf79c6060b0800ca0eac7bc187bec32c31f1bee28a9`。
+先选“导入 ZIP 曲包”，选择测试包，再点击难度旁的“准备谱面”；应提示谱面与音频已准备。
+重复导入不应增加歌曲；重启后曲目保留；移除曲包后外部原文件保留。
+也可使用目录入口导入解压后的曲包。当前尚不能游玩。
+请反馈 ZIP/目录导入、准备、重启、飞行模式结果与错误提示。
+
+## 旧 A0 诊断版
+
 [下载 APK](./foxdroid-a0-20261004-debug.apk?raw=true)
 
 - 版本：0.1.0-a0，versionCode 1；Android 10 及以上。

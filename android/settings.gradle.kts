@@ -5,3 +5,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "FoxDroid"
 include(":app", ":content-model", ":game-core")
+include(":content-local")

@@ -90,3 +90,37 @@ SHA-256: `a3b0c38d78039a6712b40d195627a0f21cc3917bbc5bae202d235c9822d3c48b`.
 This is a debug-signed A0 diagnostic shell, not a playable game. User device
 acceptance remains pending. No audio latency, four-point touch or complete-game
 acceptance is inferred from emulator results.
+
+## User-supplied physical-device evidence (2026-10-04)
+
+Two screenshots supplied by the user show the local-library and diagnostics
+screens running on Xiaomi 23090RA98C, Android 16/API 36. Diagnostics reports
+120.00001 Hz, recommended sample rate 48000 Hz and buffer size 256 frames.
+Both screens are readable and show no obvious system-bar overlap.
+This confirms physical-device startup and access to those two screens.
+The screenshot does not identify the APK checksum, so association with the
+provided A0 package is based on conversation context, not binary verification.
+
+System Back, return-button behavior, rotation, background/lock-screen recovery,
+60 Hz device coverage, audio latency, underrun and multi-touch behavior are not
+established by these screenshots. Sample-rate and buffer recommendations are
+platform properties, not measured playback latency. A0 remains partially
+complete. User screenshots were not copied into the public repository because
+their status bars contain unrelated personal device information.
+
+### User confirmation on the same Xiaomi device
+
+The user confirmed: return-to-library button, system Back, rotation,
+background resume and resume after screen lock all work normally.
+These are user-reported physical-device acceptance results, separate from
+the emulator checks above. First high-refresh device A0 shell checks pass;
+the second 60 Hz physical device remains unverified.
+
+UX preference: support the familiar Android rotation suggestion/button near
+the lower screen edge. This is recorded for implementation review; availability
+and placement depend on system navigation and rotation settings. No custom
+rotation button has been added in this change.
+
+The user subsequently confirmed that 60 Hz is recognized correctly. This
+establishes refresh-rate recognition only; a separate 60 Hz device's full
+installation/navigation/lifecycle matrix is not inferred from that statement.

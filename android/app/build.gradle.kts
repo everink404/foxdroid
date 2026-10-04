@@ -6,8 +6,8 @@ android {
         applicationId = "dev.foxdroid.app"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0-a0"
+        versionCode = 2
+        versionName = "0.2.0-a1"
         ndk { abiFilters += "arm64-v8a" }
     }
     compileOptions {
@@ -16,4 +16,4 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
 }
-dependencies { implementation(project(":content-model")); implementation(project(":game-core")) }
+dependencies { implementation(project(":content-model")); implementation(project(":game-core")); implementation(project(":content-local")) }
