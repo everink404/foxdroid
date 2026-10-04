@@ -25,6 +25,7 @@ class GameActivity : Activity() {
     private var handle = 0L
     private var decoded: DecodedAudio? = null
     private var notes = emptyList<Note>()
+    private var progress = LiveProgress(emptyList())
     private val events = mutableListOf<GameInput>()
     private val touchState = TouchState()
     private var resumeFrame = 0L
@@ -63,6 +64,7 @@ class GameActivity : Activity() {
                 title = chart.getString("title")
                 val timing = chart.getJSONObject("timing")
                 notes = parseChartNotes(timing.keys().asSequence().associateWith { timing.getString(it) }, chart.getString("notes"))
+                progress=LiveProgress(notes)
                 require(notes.isNotEmpty() && notes.size <= 2000) { "原型最多支持 2000 音符" }
                 require(notes.minOf { it.time } >= -2) { "谱面前导时间超过原型上限" }
                 val music = File(chart.getString("audio")).canonicalFile
@@ -137,6 +139,7 @@ class GameActivity : Activity() {
                 } else {
                     lastTime = time
                     val visualTime = time + visualOffsetMs/1000.0
+                    val live=progress.advance(time+(inputOffsetMs+audioOffsetMs)/1000.0,events)
                     val receptor = height*.28f
                     for (lane in 0..3) {
                         paint.color = if (lane in touchState.pointers.values) Color.rgb(50,100,150) else Color.rgb(35,35,50)
@@ -144,15 +147,14 @@ class GameActivity : Activity() {
                     }
                     for (note in notes) {
                         val y = receptor + ((note.time-visualTime)*height*.45).toFloat()
-                        if (y in -100f..height.toFloat()) {
+                        val tail = note.endTime?.let { receptor + ((it-visualTime)*height*.45).toFloat() }
+                        if (y <= height && (tail ?: y) >= -100f) {
                             val x = (note.lane+.5f)*width/4
                             paint.color = if (note.type == "mine") Color.RED else Color.CYAN
-                            val endTime = note.endTime
-                            if (endTime != null) {
-                                val tail = receptor + ((endTime-visualTime)*height*.45).toFloat()
-                                canvas.drawRect(x-15,y,x+15,tail.coerceAtMost(height.toFloat()),paint)
+                            if (tail != null) {
+                                canvas.drawRect(x-15,y.coerceAtLeast(-100f),x+15,tail.coerceAtMost(height.toFloat()),paint)
                             }
-                            canvas.drawCircle(x,y,28f,paint)
+                            if(y >= -100f) canvas.drawCircle(x,y,28f,paint)
                         }
                     }
                     paint.color = Color.WHITE
@@ -160,6 +162,7 @@ class GameActivity : Activity() {
                     canvas.drawText("暂停 · 时间 %.2f · 输入 %d".format(time,events.size),30f,130f,paint)
                     canvas.drawText("${stats[0]} Hz · burst ${stats[1]} · underrun ${stats[3]}",30f,175f,paint)
                     canvas.drawText("输入单调时间戳 $lastInputNanos ns",30f,220f,paint)
+                    canvas.drawText("分数 ${live.score.points} · 连击 ${live.score.combo} · ${live.last}",30f,height-40f,paint)
                     val end = maxOf(notes.maxOf { it.endTime ?: it.time }+1, pcm.frames.toDouble()/pcm.rate-2)
                     if (time > end) { post { settle() }; return }
                 }
@@ -206,12 +209,9 @@ class GameActivity : Activity() {
         pauseGame(); completed = true
         val results = evaluateInputs(notes,events)
         val judgments = results.filter { it.type != "mine" }.map { it.judgment ?: it.headJudgment ?: "Miss" }
-        val points = judgments.map { when(it) { "Perfect" -> 1000; "Great" -> 700; "Good" -> 300; else -> 0 } }.sum()
-        var combo = 0; var maximum = 0
-        judgments.forEach { if (it == "Miss") combo = 0 else { combo++; maximum = maxOf(maximum,combo) } }
-        val accuracy = if (judgments.isEmpty()) 0.0 else judgments.sumOf { when(it) { "Perfect" -> 1.0; "Great" -> .8; "Good" -> .5; else -> 0.0 } }/judgments.size*100
-        val summary = "完成 · 分数 $points · 最大连击 $maximum\n准确率 %.1f%%\n%s\n持续音符 %s\n地雷 %s".format(
-            accuracy,judgments.groupingBy { it }.eachCount(),results.mapNotNull { it.bodyJudgment }.groupingBy { it }.eachCount(),
+        val score=scoreJudgments(results)
+        val summary = "完成 · 分数 ${score.points} · 最大连击 ${score.maximum}\n准确率 %.1f%%\n%s\n持续音符 %s\n地雷 %s".format(
+            score.accuracy,judgments.groupingBy { it }.eachCount(),results.mapNotNull { it.bodyJudgment }.groupingBy { it }.eachCount(),
             results.filter { it.type == "mine" }.map { it.judgment }.groupingBy { it }.eachCount())
         completedSummary=summary
         getSharedPreferences("scores",MODE_PRIVATE).edit().putString("last-result", "$title\n$summary").apply()

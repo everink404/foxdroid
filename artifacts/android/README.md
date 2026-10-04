@@ -1,5 +1,12 @@
 # FoxDroid Android 真机验收包
 
+## 最新 0.4.2 实时反馈版
+
+[下载 0.4.2 APK](./foxdroid-mvp-20261004-live-debug.apk?raw=true)，versionCode 7，可覆盖安装。
+SHA-256：`97459a17762f8bf939583191bc2d92a52fd7984558e05ee614f60ccfedd7e190`。
+游玩底部显示分数、连击和最近判定，结果在判定窗口结束后更新；长按尾条保持可见。结算与游玩共用计分规则。
+请检查命中后分数/连击、漏键后连击中断、暂停续播及最终成绩。核心测试、模拟器画面/结算和重建续播回归通过；新反馈的真机检查待完成。详见 [验收记录](../../docs/ANDROID_MVP_VALIDATION.md)。
+
 ## 最新 MVP 生命周期验收版
 
 [下载 0.4.1 APK](./foxdroid-mvp-20261004-debug.apk?raw=true)，versionCode 6，可覆盖安装，保留本地曲包。
