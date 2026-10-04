@@ -9,9 +9,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /** Exercises the real Android SQLite implementation without adding a test framework. */
-class IndexInstrumentation : Instrumentation() {
-    override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
+class IndexInstrumentation : ServerInstrumentation() {
+    private var serverMode=false
+    override fun onCreate(arguments: Bundle?) { serverMode=arguments?.getString("server")=="true"; super.onCreate(arguments) }
     override fun onStart() {
+        if (serverMode) { super.onStart(); return }
         val root = File(targetContext.cacheDir, "index-test-${System.nanoTime()}").apply { mkdirs() }
         val database = "index-test-${System.nanoTime()}.db"
         try {

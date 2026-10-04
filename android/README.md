@@ -3,6 +3,7 @@
 本分区包含 Android 客户端与 Gradle 构建配置。
 
 - `app/`：Android 应用入口。
+- app 中 ServerContent/ServerActivity 提供默认关闭的可选服务器 MVP；运行时仍只使用本地文件。服务器接口回归通过 IndexInstrumentation 的 `server=true` 参数运行，测试 base 地址和原创素材 SHA-256 可传入；范围见 [A3 验证](../docs/ANDROID_A3_VALIDATION.md)。
 - `content-model/`：内容数据模型。
 - `game-core/`：谱面与游戏核心逻辑及共享向量测试。
 - `content-local/`：安全导入辅助、本地解析及来源准备接口；app 中的 LibraryIndex 管理 SQLite 元数据缓存。

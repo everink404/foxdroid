@@ -23,7 +23,7 @@ import java.io.File
 import java.security.MessageDigest
 import java.util.concurrent.Executors
 
-/** A0 diagnostic shell. Content service remains disabled and no network permission is declared. */
+/** Local library remains independent of the optional server source. */
 class MainActivity : Activity() {
     private var diagnosticsVisible = false
     private val worker = Executors.newSingleThreadExecutor()
@@ -97,11 +97,12 @@ class MainActivity : Activity() {
         diagnosticsVisible = false
         page("FoxDroid · 本地曲库").apply {
             addView(TextView(this@MainActivity).apply {
-                text = "家庭内容服务器默认关闭。\n$importStatus"
+                text = "家庭内容服务器${if (getSharedPreferences("server-settings",MODE_PRIVATE).getBoolean("enabled",false)) "已开启" else "已关闭"}。\n$importStatus"
                 textSize = 18f
             })
             addView(Button(this@MainActivity).apply { text = "设备诊断"; setOnClickListener { showDiagnostics() } })
             addView(Button(this@MainActivity).apply { text = "延迟偏移设置"; setOnClickListener { calibrationDialog() } })
+            addView(Button(this@MainActivity).apply { text = "家庭内容服务器设置"; isEnabled = !busy; setOnClickListener { startActivity(Intent(this@MainActivity,ServerActivity::class.java)) } })
             val lastScore = getSharedPreferences("scores",MODE_PRIVATE).getString("last-result",null)
             if (lastScore != null) addView(TextView(this@MainActivity).apply { text = "上次成绩：\n$lastScore" })
             addView(Button(this@MainActivity).apply {
