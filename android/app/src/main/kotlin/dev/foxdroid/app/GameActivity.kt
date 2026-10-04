@@ -63,10 +63,10 @@ class GameActivity : Activity() {
                 require(notes.minOf { it.time } >= -2) { "谱面前导时间超过原型上限" }
                 val music = File(chart.getString("audio")).canonicalFile
                 require(music.toPath().startsWith(File(filesDir, "library").canonicalFile.toPath()))
-                AudioDecoder.decode(music.path)
+                AudioDecoder.decode(music.path, cacheDir)
             }
             runOnUiThread {
-                if (isDestroyed) return@runOnUiThread
+                if (isDestroyed) { result.getOrNull()?.file?.delete(); return@runOnUiThread }
                 result.onSuccess { decoded = it; showPaused("已准备，点击开始") }
                     .onFailure { showPaused("准备失败：${it.message}") }
             }
@@ -88,7 +88,7 @@ class GameActivity : Activity() {
         inputOffsetMs = calibration.getInt("inputOffsetMs",0)
         visualOffsetMs = calibration.getInt("visualOffsetMs",0)
         if (manager.requestAudioFocus(focus) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) { showPaused("无法获取音频焦点"); return }
-        handle = audio.open(pcm.pcm, pcm.rate, resumeFrame)
+        handle = audio.open(pcm.file.path, pcm.rate, resumeFrame)
         if (handle == 0L) { manager.abandonAudioFocusRequest(focus); showPaused("无法打开 AAudio 输出，请检查音频设备"); return }
         paused = false
         streamOpenedAt = System.nanoTime()
@@ -97,7 +97,7 @@ class GameActivity : Activity() {
             override fun onDraw(canvas: Canvas) {
                 if (paused || handle == 0L) return
                 val stats = audio.stats(handle)
-                if (stats[4] != 0) { post { pauseGame() }; return }
+                if (stats[4] != 0) { post { pauseGame(); showPaused("音频流中断：${stats[4]}，缓存缺帧 ${stats[6]}") }; return }
                 val time = audio.position(handle, System.nanoTime())
                 canvas.drawColor(Color.rgb(20,20,30))
                 paint.color = Color.WHITE; paint.textSize = 38f
@@ -132,7 +132,7 @@ class GameActivity : Activity() {
                     canvas.drawText("暂停 · 时间 %.2f · 输入 %d".format(time,events.size),30f,130f,paint)
                     canvas.drawText("${stats[0]} Hz · burst ${stats[1]} · underrun ${stats[3]}",30f,175f,paint)
                     canvas.drawText("输入单调时间戳 $lastInputNanos ns",30f,220f,paint)
-                    val end = maxOf(notes.maxOf { it.endTime ?: it.time }+1, pcm.pcm.size/2.0/pcm.rate-2)
+                    val end = maxOf(notes.maxOf { it.endTime ?: it.time }+1, pcm.frames.toDouble()/pcm.rate-2)
                     if (time > end) { post { settle() }; return }
                 }
                 postInvalidateOnAnimation()
@@ -167,7 +167,7 @@ class GameActivity : Activity() {
         val time = audio.position(handle,System.nanoTime()).takeIf { it.isFinite() } ?: lastTime
         touchState.update(emptyMap()).forEach { events += GameInput(it.lane,"up",time+(inputOffsetMs+audioOffsetMs)/1000.0) }
         resumeFrame = ((time+2)*checkNotNull(decoded).rate).toLong().coerceAtLeast(0)
-        audioStats = audio.stats(handle).let { "AAudio ${it[0]} Hz · buffer ${it[2]} · underrun ${it[3]} · mode ${it[5]}\n输入事件 ${events.size} 条" }
+        audioStats = audio.stats(handle).let { "AAudio ${it[0]} Hz · buffer ${it[2]} · underrun ${it[3]} · mode ${it[5]} · 缓存缺帧 ${it[6]}\n输入事件 ${events.size} 条" }
         audio.close(handle); handle = 0; paused = true
         manager.abandonAudioFocusRequest(focus)
         showPaused("已暂停，继续时重新建立音频时钟")
@@ -192,5 +192,5 @@ class GameActivity : Activity() {
     @Deprecated("Prototype back navigation")
     override fun onBackPressed() { if (!paused) pauseGame() else super.onBackPressed() }
     override fun onStop() { pauseGame(); super.onStop() }
-    override fun onDestroy() { if (handle != 0L) audio.close(handle); handle = 0; worker.shutdown(); super.onDestroy() }
+    override fun onDestroy() { if (handle != 0L) audio.close(handle); handle = 0; worker.shutdownNow(); decoded?.file?.delete(); super.onDestroy() }
 }

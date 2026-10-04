@@ -4,6 +4,9 @@ import android.app.Instrumentation
 import android.app.Activity
 import android.os.Bundle
 import java.io.File
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /** Exercises the real Android SQLite implementation without adding a test framework. */
 class IndexInstrumentation : Instrumentation() {
@@ -31,7 +34,36 @@ class IndexInstrumentation : Instrumentation() {
                 check(song.delete())
                 check(index.refresh(root).let { it.songs.isEmpty() && it.errors.isEmpty() })
             }
-            finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "PASS: SQLite create/cache/reopen/change/bad-file/delete") })
+            // Three minutes of stereo PCM exceeds the old 24 MiB cap.
+            val wav = File(root,"long.wav")
+            val dataBytes = 48000 * 180 * 4
+            val header = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
+            header.put("RIFF".toByteArray()).putInt(36+dataBytes).put("WAVEfmt ".toByteArray())
+                .putInt(16).putShort(1).putShort(2).putInt(48000).putInt(192000).putShort(4).putShort(16)
+                .put("data".toByteArray()).putInt(dataBytes)
+            RandomAccessFile(wav,"rw").use { it.write(header.array()); it.setLength(44L+dataBytes) }
+            val decoded = AudioDecoder.decode(wav.path,root)
+            check(decoded.rate == 48000 && decoded.frames == 48000L*182)
+            check(decoded.file.length() == decoded.frames*8)
+            val audio = NativeAudio()
+            fun checkPlayback(offset: Long) {
+                val handle = audio.open(decoded.file.path,decoded.rate,offset)
+                check(handle != 0L)
+                try {
+                    var first = Double.NaN
+                    val deadline = System.nanoTime()+5_000_000_000L
+                    while (!first.isFinite() && System.nanoTime()<deadline) {
+                        Thread.sleep(20); first = audio.position(handle,System.nanoTime())
+                    }
+                    check(first.isFinite() && kotlin.math.abs(first-(offset/48000.0-2)) < .2) { "Startup jumped: $first" }
+                    Thread.sleep(3000)
+                    val next = audio.position(handle,System.nanoTime())
+                    check(next-first in 2.5..3.5) { "Clock did not advance: $first -> $next" }
+                    check(audio.stats(handle)[6] == 0) { "PCM buffer starved" }
+                } finally { audio.close(handle) }
+            }
+            checkPlayback(0); checkPlayback(48000L*60)
+            finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "PASS: SQLite; 180s WAV disk decode; native clock startup/progression/resume; zero PCM starvation") })
         } catch (e: Throwable) {
             finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "FAIL: ${e.stackTraceToString()}") })
         } finally {

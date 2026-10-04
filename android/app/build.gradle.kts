@@ -8,8 +8,8 @@ android {
         applicationId = "dev.foxdroid.app"
         minSdk = 29
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.3.0-a2"
+        versionCode = 4
+        versionName = "0.3.1-a2"
         testInstrumentationRunner = "dev.foxdroid.app.IndexInstrumentation"
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
     }
