@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import android.media.AudioManager
 import android.view.View
+import android.view.WindowInsets
+import android.window.OnBackInvokedDispatcher
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -12,9 +14,29 @@ import android.widget.TextView
 
 /** A0 diagnostic shell. Content service remains disabled and no network permission is declared. */
 class MainActivity : Activity() {
+    private var diagnosticsVisible = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        showLibrary()
+        if (Build.VERSION.SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) { navigateBack() }
+        }
+        if (savedInstanceState?.getBoolean("diagnosticsVisible") == true) showDiagnostics()
+        else showLibrary()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("diagnosticsVisible", diagnosticsVisible)
+        super.onSaveInstanceState(outState)
+    }
+
+    @Deprecated("Legacy navigation for Android 10–12")
+    override fun onBackPressed() { navigateBack() }
+
+    private fun navigateBack() {
+        if (diagnosticsVisible) showLibrary() else finish()
     }
 
     private fun page(title: String): LinearLayout {
@@ -23,12 +45,26 @@ class MainActivity : Activity() {
             val padding = (24 * resources.displayMetrics.density).toInt()
             setPadding(padding, padding, padding, padding)
         }
-        setContentView(ScrollView(this).apply { addView(layout) })
+        setContentView(ScrollView(this).apply {
+            addView(layout)
+            setOnApplyWindowInsetsListener { view, insets ->
+                if (Build.VERSION.SDK_INT >= 30) {
+                    val bars = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
+                    view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+                } else {
+                    @Suppress("DEPRECATION")
+                    view.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
+                        insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+                }
+                insets
+            }
+        })
         layout.addView(TextView(this).apply { text = title; textSize = 28f; setPadding(0, 0, 0, 32) })
         return layout
     }
 
     private fun showLibrary() {
+        diagnosticsVisible = false
         page("FoxDroid · 本地曲库").apply {
             addView(TextView(this@MainActivity).apply {
                 text = "曲库为空\n\n本地导入正在开发中。\n家庭内容服务器默认关闭。"
@@ -40,6 +76,7 @@ class MainActivity : Activity() {
 
     @Suppress("DEPRECATION")
     private fun showDiagnostics() {
+        diagnosticsVisible = true
         val audio = getSystemService(AUDIO_SERVICE) as AudioManager
         val outputs = audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS).joinToString { "类型 ${it.type}" }
         page("设备诊断").apply {

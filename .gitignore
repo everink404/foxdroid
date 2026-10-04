@@ -16,3 +16,8 @@ android/.gradle/
 android/local.properties
 android/.idea/
 android/.tools/
+
+.tools/
+.gradle/
+local.properties
+.kotlin/

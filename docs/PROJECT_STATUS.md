@@ -229,3 +229,11 @@ FoxDroid 的技术方向已经从可行性讨论进入实际开发。当前已�
 - [开发规划](./DEVELOPMENT_PLAN.md)：说明完整里程碑、依赖关系和需求治理规则。
 - [验收清单](./ACCEPTANCE_CHECKLIST.md)：逐项记录 M1 与完整 MVP 的通过条件和证据。
 - 本文：反映某一时间点的真实完成状态与下一执行顺序；功能变化后应优先更新本文。
+
+## Primary Android A0 进度（2026-10-04）
+
+交接分支已有 app、content-model、game-core 工程、空曲库与设备诊断页。Primary 已实际通过 APK debug 构建、3 个测试方法（含 5 组共享谱面向量）及 lint（0 错误、20 警告）。已加入 Gradle 8.11.1 wrapper、内容契约测试与边界说明。A0 部分完成；adb 未发现设备，两台目标机安装启动未验证。A1 导入与 A2 原生音频、触控、判定尚未实现。详情见 [A0 验证记录](./ANDROID_A0_VALIDATION.md)。前文 Android 未开始的快照描述已由本节更新；不代表 A0 或 M2 验收通过。
+
+### A0 模拟器验收与真机包
+
+API 35 Pixel 7 配置模拟器已通过安装、冷启动、空曲库、诊断页、返回导航、后台恢复与旋转重建。修复系统栏安全区域和返回/状态恢复；最终 APK 已准备在 artifacts/android/，将按用户授权上传交接分支。真机音频、四点触控与完整一局仍待后续实现及验收；详见 ANDROID_A0_VALIDATION.md。
