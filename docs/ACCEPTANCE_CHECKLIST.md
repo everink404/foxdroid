@@ -1,6 +1,6 @@
 # FoxDroid 验收清单
 
-> 更新：2026-09-30  
+> 更新：2026-10-04
 > 当前结论：M1 服务端与 Web 可运行原型，尚未达到 MVP。  
 > 依据：[项目状态](./PROJECT_STATUS.md)、[产品需求](./PRD.md)、[开发规划](./DEVELOPMENT_PLAN.md)。
 
@@ -10,11 +10,17 @@
 - 每项完成时记录设备/浏览器版本、测试曲包、结果和失败日志。自动测试通过不替代音画与设备实测。
 - M1 可单独验收服务端与 Web 链路；完整 MVP 还需要 M0、M2、M3 和 M4 的门槛。
 
+## 2026-10-04 用户实测记录
+
+用户确认：真实曲包已接入，并在浏览器完成一次从选歌到结算的完整流程；Chrome 判定、断网、容器重启及兼容性验收均已完成。此前也已确认曲库重新扫描可用。
+
+这些是用户现场验收结论。曲包名称、浏览器与设备版本、测试步骤、断网时点、重启后的数据状态和兼容性覆盖范围尚未记录，因此下方要求具体证据的细项暂不勾选。补齐记录后逐项关闭；M1 总门槛仍按本清单判定。
+
 ## A. 已有证据
 
-- [x] `.sm` 与标准 `.ssc` 能解析并扫描成 SQLite 内容索引；损坏歌曲单独报错。证据：`server/tests/test_simfile.py`、`server/tests/test_scanner_database.py`。
-- [x] 清单、歌曲、谱面、媒体和扫描接口具有基础自动测试；清单 ETag 与媒体 Range 已覆盖。证据：`server/tests/test_api.py`。
-- [x] Web 时间轴和 Tap/Hold/Roll/Mine 逻辑有共享向量；覆盖 BPM、正负 Offset、Stop、Delay 和 Warp。证据：`shared/test-vectors/`、`server/tests/web_core.test.mjs`。
+- [x] `.sm` 与标准 `.ssc` 能解析并扫描成 SQLite 内容索引；损坏歌曲单独报错。证据：`docker/server/tests/test_simfile.py`、`docker/server/tests/test_scanner_database.py`。
+- [x] 清单、歌曲、谱面、媒体和扫描接口具有基础自动测试；清单 ETag 与媒体 Range 已覆盖。证据：`docker/server/tests/test_api.py`。
+- [x] Web 时间轴和 Tap/Hold/Roll/Mine 逻辑有共享向量；覆盖 BPM、正负 Offset、Stop、Delay 和 Warp。证据：`shared/test-vectors/`、`docker/server/tests/web_core.test.mjs`。
 - [x] 原创黄金曲库包含 `.sm/.ssc` 优先级、谱面级时间标签覆盖、损坏文件和缺失音乐。证据：`shared/golden-library/`。
 - [x] 本地自动检查通过：9 项 Python 测试、23 项 JavaScript 测试及 Ruff 检查（2026-09-30）。
 - [x] 项目已建立 Git 历史并发布到 [GitHub](https://github.com/everink404/foxdroid)。
@@ -43,7 +49,7 @@
 - [ ] 当前桌面版 Firefox：完成相同主流程，记录版本与差异。
 - [ ] 浏览器不支持音频或输入能力时，显示可理解的提示，不进入无法游玩的状态。
 
-**M1 通过条件：**从空数据库启动到带音频结算可稳定重复；准备完成后断网不影响本局；三种桌面浏览器完成基础验证。当前不能勾选。
+**M1 通过条件：**从空数据库启动到带音频结算可稳定重复；准备完成后断网不影响本局；三种桌面浏览器完成基础验证。已有用户现场验收结论，具体证据和其余细项仍待记录。
 
 ## C. 完整 MVP 前仍需开发
 
@@ -76,5 +82,5 @@
 
 ## 本轮受限条件与下一步
 
-- 当前开发机未检测到 Docker 或 Firefox，因此对应实测需要另一台设备或安装后执行。
-- 优先顺序：**M1 带音频整局与断网验收 → Docker 实机 → Chrome/Edge/Firefox 矩阵 → Android 最小工程与真机链路**。
+- 当前开发机未检测到 Docker 或 Firefox；用户已在另一环境完成 Docker 重启及浏览器兼容性现场验收，覆盖细节待补记。
+- 优先补齐现场验收记录，再处理本清单尚未通过的细项；M1 达标后进入 Android 最小工程与真机链路。

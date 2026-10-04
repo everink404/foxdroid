@@ -4,6 +4,15 @@ FoxDroid 是一个面向家庭局域网的 StepMania 兼容节奏游戏项目。
 
 目前已进入内容服务开发阶段。服务端可以扫描 `.sm`/标准 `.ssc` 曲库，将目录转换为 SQLite 索引，并通过 HTTP 向内置 Web 页面和未来的 Android 客户端提供清单、解析后的谱面与媒体资源。
 
+## 仓库分区
+
+- [`docker/`](docker/README.md)：NAS 内容服务、桌面 Web 客户端和 Docker 部署；服务端源码位于 `docker/server/`。
+- [`android/`](android/README.md)：Android 客户端，包含应用、内容模型和游戏核心模块。
+- `shared/`：两端共用的 API 契约、测试向量和黄金曲库。
+- `docs/`：项目需求、规划和验收资料。
+
+从仓库根目录启动 Docker 服务：`docker compose -f docker/docker-compose.yml up --build`。
+
 ## 项目资料
 
 - [当前进展与后续规划](docs/PROJECT_STATUS.md)
@@ -11,7 +20,7 @@ FoxDroid 是一个面向家庭局域网的 StepMania 兼容节奏游戏项目。
 - [产品需求](docs/PRD.md)
 - [技术路线](docs/TECHNICAL_ROUTE.md)
 - [开发规划](docs/DEVELOPMENT_PLAN.md)
-- [服务端说明](server/README.md)
+- [服务端说明](docker/server/README.md)
 
 ## 当前实现
 

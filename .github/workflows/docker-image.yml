@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - .github/workflows/docker-image.yml
-      - server/Dockerfile
-      - server/.dockerignore
-      - server/pyproject.toml
-      - server/README.md
-      - server/src/**
-      - server/tests/**
+      - docker/docker-compose.yml
+      - shared/**
+      - docker/server/Dockerfile
+      - docker/server/.dockerignore
+      - docker/server/pyproject.toml
+      - docker/server/README.md
+      - docker/server/src/**
+      - docker/server/tests/**
   workflow_dispatch:
     inputs:
       tag:
@@ -31,13 +33,13 @@ jobs:
           python-version: '3.12'
       - name: Test server
         run: |
-          python -m pip install './server[dev]'
-          python -m pytest server/tests
-          python -m ruff check server/src server/tests
-          node --test server/tests/web_core.test.mjs
+          python -m pip install './docker/server[dev]'
+          python -m pytest docker/server/tests
+          python -m ruff check docker/server/src docker/server/tests
+          node --test docker/server/tests/web_core.test.mjs
       - name: Build and smoke test image
         run: |
-          docker build -t foxdroid-smoke:ci ./server
+          docker build -t foxdroid-smoke:ci ./docker/server
           docker run -d --name foxdroid-smoke -p 127.0.0.1:18080:8080 foxdroid-smoke:ci
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:18080/api/v1/health; then
@@ -73,7 +75,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v7
         with:
-          context: ./server
+          context: ./docker/server
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/foxdroid:${{ inputs.tag }}

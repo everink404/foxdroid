@@ -11,7 +11,7 @@ from foxdroid_server.scanner import scan_library
 
 class ScannerDatabaseTests(TestCase):
     def test_golden_library_scans_valid_songs_and_isolates_errors(self) -> None:
-        library = Path(__file__).resolve().parents[2] / "shared" / "golden-library"
+        library = Path(__file__).resolve().parents[3] / "shared" / "golden-library"
 
         result = scan_library(library)
 

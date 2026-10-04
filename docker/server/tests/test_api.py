@@ -112,6 +112,6 @@ def test_missing_library_is_reported_without_creating_it() -> None:
 
 
 def test_openapi_matches_shared_v1_snapshot() -> None:
-    snapshot_path = Path(__file__).parents[2] / "shared" / "api" / "openapi-v1.json"
+    snapshot_path = Path(__file__).parents[3] / "shared" / "api" / "openapi-v1.json"
     expected = json.loads(snapshot_path.read_text(encoding="utf-8"))
     assert create_app().openapi() == expected

@@ -13,11 +13,11 @@ import {
 import { evaluateInputSequence } from "../src/foxdroid_server/web/gameplay.mjs";
 
 const noteVectors = JSON.parse(await readFile(
-  new URL("../../shared/test-vectors/chart-notes.json", import.meta.url),
+  new URL("../../../shared/test-vectors/chart-notes.json", import.meta.url),
   "utf8",
 ));
 const judgmentVectors = JSON.parse(await readFile(
-  new URL("../../shared/test-vectors/judgment-sequences.json", import.meta.url),
+  new URL("../../../shared/test-vectors/judgment-sequences.json", import.meta.url),
   "utf8",
 ));
 

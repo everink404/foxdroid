@@ -6,6 +6,7 @@
 > 依据：[产品需求文档](./PRD.md) 0.4、[技术路线](./TECHNICAL_ROUTE.md) 0.4
 
 当前完成状态、已知技术债和下一迭代建议见 [项目状态与后续规划](./PROJECT_STATUS.md)。
+Android 手机端的分阶段实施任务与退出标准见 [Android 手机端开发规划](./ANDROID_DEVELOPMENT_PLAN.md)。
 
 ## 1. 当前开发主轴
 

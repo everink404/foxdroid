@@ -6,9 +6,13 @@ __pycache__/
 dist/
 build/
 *.egg-info/
-server/data/
-server/library/
+docker/server/data/
+docker/server/library/
 data/
 library/
 .env
 .siyuan.local.json
+android/.gradle/
+android/local.properties
+android/.idea/
+android/.tools/

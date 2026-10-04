@@ -25,13 +25,13 @@ current run is aborted instead of attempting an unsafe clock resynchronization.
 
 ## Run with Docker Compose
 
-Create a `library` directory beside the root `docker-compose.yml`, place song folders inside it, then run:
+From the repository root, create `docker/library`, place song folders inside it, then run:
 
 ```shell
-docker compose up --build
+docker compose -f docker/docker-compose.yml up --build
 ```
 
-Open `http://localhost:8080/`. The library is mounted read-only and the generated database is stored under `server/data`.
+Open `http://localhost:8080/`. The library is mounted read-only and the generated database is stored under `docker/server/data`.
 
 ## Run the published image
 
@@ -41,9 +41,9 @@ Pull `montequilla/foxdroid:0.1.0` from Docker Hub, mount your song library at
 root on Linux or macOS:
 
 ```shell
-mkdir -p library server/data
+mkdir -p docker/library docker/server/data
 docker run --name foxdroid -p 8080:8080 \
-  -v "$PWD/library:/library:ro" -v "$PWD/server/data:/data" \
+  -v "$PWD/docker/library:/library:ro" -v "$PWD/docker/server/data:/data" \
   montequilla/foxdroid:0.1.0
 ```
 
@@ -53,17 +53,18 @@ Open `http://localhost:8080/` after the server starts.
 
 ```shell
 python -m venv .venv
-.venv/Scripts/pip install -e ".[dev]"
-.venv/Scripts/pytest
-.venv/Scripts/foxdroid-server
+.venv/Scripts/pip install -e "docker/server[dev]"
+.venv/Scripts/pytest -c docker/server/pyproject.toml docker/server/tests
+cd docker
+../.venv/Scripts/foxdroid-server
 ```
 
 On Linux or macOS, use `.venv/bin/` instead of `.venv/Scripts/`.
 
-For local gameplay verification, generate the deterministic FoxDroid click track:
+From the repository root, generate the deterministic FoxDroid click track:
 
 ```shell
-.venv/Scripts/python server/tools/generate_demo_audio.py "library/FoxDroid Demo/First Steps/first-steps.wav"
+.venv/Scripts/python docker/server/tools/generate_demo_audio.py "docker/library/FoxDroid Demo/First Steps/first-steps.wav"
 ```
 
 The generated WAV contains synthesized clicks only and does not include third-party media.
