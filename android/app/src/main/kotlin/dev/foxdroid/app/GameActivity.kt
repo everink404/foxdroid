@@ -38,6 +38,9 @@ class GameActivity : Activity() {
     private var inputOffsetMs = 0
     private var visualOffsetMs = 0
     private var lastInputNanos = 0L
+    private var completedSummary = ""
+    private lateinit var chartFile: File
+    private lateinit var sessionFile: File
     private lateinit var surface: View
     private lateinit var focus: AudioFocusRequest
     private val manager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
@@ -51,7 +54,8 @@ class GameActivity : Activity() {
             .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_GAME).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
             .setOnAudioFocusChangeListener { if (it != AudioManager.AUDIOFOCUS_GAIN) pauseGame() }.build()
         setContentView(TextView(this).apply { text = "正在预解码本地音频…"; textSize = 24f; setPadding(40,100,40,40) })
-        val chartFile = File(cacheDir, intent.getStringExtra("chartFile") ?: "missing-chart.json").canonicalFile
+        chartFile = File(cacheDir, intent.getStringExtra("chartFile") ?: "missing-chart.json").canonicalFile
+        sessionFile = File(cacheDir,"session-${chartFile.name}")
         worker.execute {
             val result = runCatching {
                 require(chartFile.parentFile == cacheDir.canonicalFile)
@@ -63,11 +67,35 @@ class GameActivity : Activity() {
                 require(notes.minOf { it.time } >= -2) { "谱面前导时间超过原型上限" }
                 val music = File(chart.getString("audio")).canonicalFile
                 require(music.toPath().startsWith(File(filesDir, "library").canonicalFile.toPath()))
-                AudioDecoder.decode(music.path, cacheDir)
+                val saved = if (state?.getBoolean("sessionSaved") == true && sessionFile.isFile) JSONObject(sessionFile.readText()) else null
+                require(state?.getBoolean("sessionSaved") != true || saved != null) { "本局恢复记录已丢失，请返回曲库重新开始" }
+                if (saved != null) {
+                    require(saved.getString("chart") == chartFile.name) { "恢复谱面不一致" }
+                    resumeFrame=saved.getLong("resumeFrame").coerceAtLeast(0)
+                    lastTime=saved.getDouble("lastTime")
+                    completed=saved.getBoolean("completed"); completedSummary=saved.optString("summary")
+                    val inputs=saved.getJSONArray("events")
+                    require(inputs.length() <= 100000) { "恢复输入记录过大" }
+                    for(i in 0 until inputs.length()) {
+                        val input=inputs.getJSONObject(i)
+                        events += GameInput(input.getInt("lane"),input.getString("action"),input.getDouble("time"))
+                    }
+                    val cached=File(cacheDir,saved.getString("pcm")).canonicalFile
+                    require(cached.parentFile == cacheDir.canonicalFile) { "音频缓存路径无效" }
+                    if (cached.isFile && cached.length() == saved.getLong("frames")*8) {
+                        DecodedAudio(cached,saved.getInt("rate"),saved.getLong("frames"))
+                    } else {
+                        AudioDecoder.decode(music.path, cacheDir).also {
+                            if(it.rate != saved.getInt("rate") || it.frames != saved.getLong("frames")) {
+                                it.file.delete(); error("音频已变化，无法恢复本局")
+                            }
+                        }
+                    }
+                } else AudioDecoder.decode(music.path, cacheDir)
             }
             runOnUiThread {
                 if (isDestroyed) { result.getOrNull()?.file?.delete(); return@runOnUiThread }
-                result.onSuccess { decoded = it; showPaused("已准备，点击开始") }
+                result.onSuccess { decoded = it; showPaused(if(completed) completedSummary else if(state?.getBoolean("sessionSaved") == true) "本局已恢复，点击继续" else "已准备，点击开始") }
                     .onFailure { showPaused("准备失败：${it.message}") }
             }
         }
@@ -185,6 +213,7 @@ class GameActivity : Activity() {
         val summary = "完成 · 分数 $points · 最大连击 $maximum\n准确率 %.1f%%\n%s\n持续音符 %s\n地雷 %s".format(
             accuracy,judgments.groupingBy { it }.eachCount(),results.mapNotNull { it.bodyJudgment }.groupingBy { it }.eachCount(),
             results.filter { it.type == "mine" }.map { it.judgment }.groupingBy { it }.eachCount())
+        completedSummary=summary
         getSharedPreferences("scores",MODE_PRIVATE).edit().putString("last-result", "$title\n$summary").apply()
         showPaused(summary)
     }
@@ -192,5 +221,23 @@ class GameActivity : Activity() {
     @Deprecated("Prototype back navigation")
     override fun onBackPressed() { if (!paused) pauseGame() else super.onBackPressed() }
     override fun onStop() { pauseGame(); super.onStop() }
-    override fun onDestroy() { if (handle != 0L) audio.close(handle); handle = 0; worker.shutdownNow(); decoded?.file?.delete(); super.onDestroy() }
+    override fun onSaveInstanceState(outState: Bundle) {
+        pauseGame()
+        decoded?.let { pcm ->
+            val inputs=org.json.JSONArray()
+            events.forEach { inputs.put(JSONObject().put("lane",it.lane).put("action",it.action).put("time",it.time)) }
+            val saved=JSONObject().put("chart",chartFile.name).put("pcm",pcm.file.name).put("rate",pcm.rate)
+                .put("frames",pcm.frames).put("resumeFrame",resumeFrame).put("lastTime",lastTime)
+                .put("completed",completed).put("summary",completedSummary).put("events",inputs)
+            val atomic=android.util.AtomicFile(sessionFile); val output=atomic.startWrite()
+            try { output.write(saved.toString().toByteArray()); atomic.finishWrite(output); outState.putBoolean("sessionSaved",true) }
+            catch(e: Exception) { atomic.failWrite(output) }
+        }
+        super.onSaveInstanceState(outState)
+    }
+    override fun onDestroy() {
+        if (handle != 0L) audio.close(handle); handle=0; worker.shutdownNow()
+        if (isFinishing) { decoded?.file?.delete(); if(::sessionFile.isInitialized) sessionFile.delete(); if(::chartFile.isInitialized && chartFile.parentFile==cacheDir.canonicalFile) chartFile.delete() }
+        super.onDestroy()
+    }
 }

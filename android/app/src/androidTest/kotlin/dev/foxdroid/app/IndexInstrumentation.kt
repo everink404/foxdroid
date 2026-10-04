@@ -11,9 +11,15 @@ import java.nio.ByteOrder
 /** Exercises the real Android SQLite implementation without adding a test framework. */
 class IndexInstrumentation : ServerInstrumentation() {
     private var serverMode=false
-    override fun onCreate(arguments: Bundle?) { serverMode=arguments?.getString("server")=="true"; super.onCreate(arguments) }
+    private var lifecycleMode=false
+    override fun onCreate(arguments: Bundle?) { serverMode=arguments?.getString("server")=="true"; lifecycleMode=arguments?.getString("lifecycle")=="true"; super.onCreate(arguments) }
     override fun onStart() {
         if (serverMode) { super.onStart(); return }
+        if (lifecycleMode) {
+            try { finish(Activity.RESULT_OK,Bundle().apply { putString("stream",GameLifecycleChecks.run(this@IndexInstrumentation)) }) }
+            catch(e: Throwable) { finish(Activity.RESULT_CANCELED,Bundle().apply { putString("stream","FAIL: ${e.stackTraceToString()}") }) }
+            return
+        }
         val root = File(targetContext.cacheDir, "index-test-${System.nanoTime()}").apply { mkdirs() }
         val database = "index-test-${System.nanoTime()}.db"
         try {

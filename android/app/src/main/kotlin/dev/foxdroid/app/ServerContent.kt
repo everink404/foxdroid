@@ -42,7 +42,8 @@ class ServerContent(private val context: Context, address: String, private val a
         for (i in 0 until assets.length()) { val asset=assets.getJSONObject(i); asset.getString("id"); asset.getString("kind"); asset.getString("mimeType"); asset.getLong("size") }
         writeJson(file,value); return value
     }
-    fun prepare(catalog: JSONObject, song: JSONObject, chartId: String): String {
+    fun prepare(catalog: JSONObject, song: JSONObject, chartId: String, progress: (String) -> Unit = {}): String {
+        progress("正在获取谱面…")
         val root = revisionRoot(catalog); val chartFile = File(root,"chart-${hash(chartId)}.json")
         val chart = if (chartFile.isFile) JSONObject(chartFile.readText()) else json("charts/${segment(chartId)}").also {
             require(it.getString("id") == chartId && it.getString("songId") == song.getString("id")); writeJson(chartFile,it)
@@ -57,10 +58,11 @@ class ServerContent(private val context: Context, address: String, private val a
             "audio/wav", "audio/x-wav", "audio/wave" -> "wav"
             "audio/mpeg" -> "mp3"
             "audio/ogg", "application/ogg" -> "ogg"
-            else -> error("音频格式不支持")
+            else -> error("音频格式不支持：${audio.getString("mimeType")}")
         }
         val local = File(audioRoot,"${catalog.getLong("catalogRevision")}-${hash(audio.getString("id"))}.$extension")
         if (!local.isFile || local.length() != size) {
+            progress("正在下载音频：0 / ${size/1024} KiB")
             val used = audioRoot.walkTopDown().filter { it.isFile }.sumOf { it.length() }
             require(used + size <= 512L*1024*1024) { "服务器缓存已满，请清除服务器缓存后重试" }
             val stage = File.createTempFile("download-", ".part",audioRoot)
@@ -68,10 +70,13 @@ class ServerContent(private val context: Context, address: String, private val a
                 request("assets/${segment(audio.getString("id"))}",size) { input ->
                     stage.outputStream().use { output ->
                         val buffer = ByteArray(65536); var count = 0L; val deadline = System.nanoTime()+120_000_000_000L
+                        var lastProgress=0L
                         while (true) {
                             check(allowed()) { "服务已关闭" }; check(System.nanoTime()<deadline) { "下载超时" }
                             val read = input.read(buffer); if (read < 0) break
                             count += read; require(count <= size) { "音频大小与清单不一致" }; output.write(buffer,0,read)
+                            val now=System.nanoTime()
+                            if (now-lastProgress>200_000_000L || count==size) { progress("正在下载音频：${count*100/size}% · ${count/1024} / ${size/1024} KiB"); lastProgress=now }
                         }
                         require(count == size) { "音频下载不完整，请重试" }
                     }
@@ -79,6 +84,7 @@ class ServerContent(private val context: Context, address: String, private val a
                 require(stage.renameTo(local)) { "无法保存下载资源" }
             } finally { stage.delete() }
         }
+        progress("下载已完成，正在进入本地音频准备页…")
         val ready = File.createTempFile("prepared-server-", ".json",context.cacheDir)
         ready.writeText(JSONObject().put("title",song.getString("title")).put("audio",local.path).put("timing",timing).put("notes",notes).toString())
         return ready.name

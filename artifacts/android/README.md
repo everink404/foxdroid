@@ -1,5 +1,13 @@
 # FoxDroid Android 真机验收包
 
+## 最新 MVP 生命周期验收版
+
+[下载 0.4.1 APK](./foxdroid-mvp-20261004-debug.apk?raw=true)，versionCode 6，可覆盖安装，保留本地曲包。
+SHA-256：`7986cd0e88c91b970b77cf508c6f4e98ecf625b3ae9355dfd8da65f165005363`。
+新增 Activity 重建后恢复暂停位置和输入记录，继续时重建音频时钟；保留服务器下载进度及明确错误提示。
+请复测暂停续播、后台/锁屏返回、四指、长按和结算。实际 Activity 重建与服务器接口测试通过，真机矩阵尚待验收。
+音频格式和预解码耗时优化保持后置。范围见 [本轮验收记录](../../docs/ANDROID_MVP_VALIDATION.md)。
+
 ## 最新 A3 可选服务器版
 
 [下载 A3 APK](./foxdroid-a3-20261004-debug.apk?raw=true)，0.4.0-a3 / versionCode 5，可覆盖安装；本地曲包保留。
