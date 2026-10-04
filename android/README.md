@@ -21,3 +21,5 @@ Primary 的本地工具位于仓库根目录 `.tools/`（已忽略，不提交�
  A2 原生音频构建还需要 NDK 28.1.13356709 与 CMake 4.1.2。测试命令补充 `:content-local:test`；游玩原型的范围和限制见 [A2 验证](../docs/ANDROID_A2_VALIDATION.md)。
 构建验证记录见 [A0 验证](../docs/ANDROID_A0_VALIDATION.md)。
 两端共用资料位于 [`shared/`](../shared/README.md)，内容服务位于 [`docker/`](../docker/README.md)。
+
+0.5.0 新增音频准备缓存及 WAV/MP3 性能路径，准备线程与 AAudio 实时播放回调保持分离。原创长曲生成脚本、性能/PCM 一致性及 Activity 恢复测试见 [音频验证](../docs/ANDROID_AUDIO_VALIDATION.md)。OGG 首次等待与真机矩阵仍待完成。

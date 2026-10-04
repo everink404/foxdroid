@@ -12,9 +12,16 @@ import java.nio.ByteOrder
 class IndexInstrumentation : ServerInstrumentation() {
     private var serverMode=false
     private var lifecycleMode=false
-    override fun onCreate(arguments: Bundle?) { serverMode=arguments?.getString("server")=="true"; lifecycleMode=arguments?.getString("lifecycle")=="true"; super.onCreate(arguments) }
+    private var performanceMode=false
+    private var performanceFormat: String?=null
+    override fun onCreate(arguments: Bundle?) { serverMode=arguments?.getString("server")=="true"; lifecycleMode=arguments?.getString("lifecycle")=="true"; performanceMode=arguments?.getString("performance")=="true"; performanceFormat=arguments?.getString("format"); super.onCreate(arguments) }
     override fun onStart() {
         if (serverMode) { super.onStart(); return }
+        if (performanceMode) {
+            try { finish(Activity.RESULT_OK,Bundle().apply { putString("stream",AudioPerformanceChecks.run(this@IndexInstrumentation,performanceFormat)) }) }
+            catch(e: Throwable) { finish(Activity.RESULT_CANCELED,Bundle().apply { putString("stream","FAIL: ${e.stackTraceToString()}") }) }
+            return
+        }
         if (lifecycleMode) {
             try { finish(Activity.RESULT_OK,Bundle().apply { putString("stream",GameLifecycleChecks.run(this@IndexInstrumentation)) }) }
             catch(e: Throwable) { finish(Activity.RESULT_CANCELED,Bundle().apply { putString("stream","FAIL: ${e.stackTraceToString()}") }) }

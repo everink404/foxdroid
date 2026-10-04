@@ -83,21 +83,25 @@ class GameActivity : Activity() {
                         events += GameInput(input.getInt("lane"),input.getString("action"),input.getDouble("time"))
                     }
                     val cached=File(cacheDir,saved.getString("pcm")).canonicalFile
-                    require(cached.parentFile == cacheDir.canonicalFile) { "音频缓存路径无效" }
-                    if (cached.isFile && cached.length() == saved.getLong("frames")*8) {
-                        DecodedAudio(cached,saved.getInt("rate"),saved.getLong("frames"))
+                    val restored=AudioDecoder.restore(cached,saved.getInt("rate"),saved.getLong("frames"),cacheDir)
+                    if (restored != null) {
+                        restored
                     } else {
                         AudioDecoder.decode(music.path, cacheDir).also {
                             if(it.rate != saved.getInt("rate") || it.frames != saved.getLong("frames")) {
-                                it.file.delete(); error("音频已变化，无法恢复本局")
+                                AudioDecoder.release(it); error("音频已变化，无法恢复本局")
                             }
                         }
                     }
                 } else AudioDecoder.decode(music.path, cacheDir)
             }
             runOnUiThread {
-                if (isDestroyed) { result.getOrNull()?.file?.delete(); return@runOnUiThread }
-                result.onSuccess { decoded = it; showPaused(if(completed) completedSummary else if(state?.getBoolean("sessionSaved") == true) "本局已恢复，点击继续" else "已准备，点击开始") }
+                if (isDestroyed) { result.getOrNull()?.let(AudioDecoder::release); return@runOnUiThread }
+                result.onSuccess {
+                    decoded=it
+                    val message=if(completed) completedSummary else if(state?.getBoolean("sessionSaved") == true) "本局已恢复，点击继续" else "已准备，点击开始"
+                    showPaused("$message\n准备用时 ${it.prepareMs} 毫秒${if(it.cacheHit) "（复用缓存）" else ""}")
+                }
                     .onFailure { showPaused("准备失败：${it.message}") }
             }
         }
@@ -226,7 +230,7 @@ class GameActivity : Activity() {
         decoded?.let { pcm ->
             val inputs=org.json.JSONArray()
             events.forEach { inputs.put(JSONObject().put("lane",it.lane).put("action",it.action).put("time",it.time)) }
-            val saved=JSONObject().put("chart",chartFile.name).put("pcm",pcm.file.name).put("rate",pcm.rate)
+            val saved=JSONObject().put("chart",chartFile.name).put("pcm",pcm.file.canonicalFile.relativeTo(cacheDir.canonicalFile).path).put("rate",pcm.rate)
                 .put("frames",pcm.frames).put("resumeFrame",resumeFrame).put("lastTime",lastTime)
                 .put("completed",completed).put("summary",completedSummary).put("events",inputs)
             val atomic=android.util.AtomicFile(sessionFile); val output=atomic.startWrite()
@@ -237,7 +241,8 @@ class GameActivity : Activity() {
     }
     override fun onDestroy() {
         if (handle != 0L) audio.close(handle); handle=0; worker.shutdownNow()
-        if (isFinishing) { decoded?.file?.delete(); if(::sessionFile.isInitialized) sessionFile.delete(); if(::chartFile.isInitialized && chartFile.parentFile==cacheDir.canonicalFile) chartFile.delete() }
+        decoded?.let { if(it.reusable || isFinishing) AudioDecoder.release(it) }
+        if (isFinishing) { if(::sessionFile.isInitialized) sessionFile.delete(); if(::chartFile.isInitialized && chartFile.parentFile==cacheDir.canonicalFile) chartFile.delete() }
         super.onDestroy()
     }
 }

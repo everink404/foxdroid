@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(fox_audio)
-add_library(fox_audio SHARED audio.cpp)
+add_library(fox_audio SHARED audio.cpp pcm.cpp)
+set_source_files_properties(pcm.cpp PROPERTIES COMPILE_OPTIONS "-O2")
 target_compile_features(fox_audio PRIVATE cxx_std_17)
 target_link_libraries(fox_audio aaudio)
