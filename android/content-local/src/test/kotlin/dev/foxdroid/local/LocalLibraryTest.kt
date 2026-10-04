@@ -8,6 +8,14 @@ import java.util.zip.ZipOutputStream
 import kotlin.test.*
 
 class LocalLibraryTest {
+    @Test fun sourceRejectsSongsOutsideRoot() {
+        val root = Files.createTempDirectory("fox-source").toFile()
+        try {
+            val source = LocalContentSource(root)
+            val outsider = LocalSong(root.parentFile.resolve("outside.sm"), "Outside", "", "audio.wav", "", emptyList())
+            assertFailsWith<IllegalArgumentException> { source.prepare(outsider, 0) }
+        } finally { root.deleteRecursively() }
+    }
     @Test fun goldenSscPrefersChartTiming() {
         val root = Files.createTempDirectory("fox-local").toFile()
         try {

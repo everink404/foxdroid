@@ -5,6 +5,7 @@
 - `app/`：Android 应用入口。
 - `content-model/`：内容数据模型。
 - `game-core/`：谱面与游戏核心逻辑及共享向量测试。
+- `content-local/`：安全导入辅助、本地解析及来源准备接口；app 中的 LibraryIndex 管理 SQLite 元数据缓存。
 
 在本目录下使用 JDK 17、Gradle 8.11.1 和 Android SDK 35 构建：
 

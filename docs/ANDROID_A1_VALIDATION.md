@@ -39,3 +39,23 @@ A1 为可验收原型，未宣称全部退出条件完成：真机 ZIP/目录提
 音频准备仅验证存在、可读及 MediaExtractor 可识别音轨，未进行完整解码或播放。
 A2 需建立 PreparedSong 运行时交接、原生音频和判定；当前 APK 不能游玩。
 系统旋转提示按钮偏好仍记录在 A0 文档，尚未改变系统方向策略。
+
+## A1 索引补齐与用户确认
+
+用户已确认前版 A1 重启后曲库正常、重复导入识别正常，记为用户真机结果。
+新增 LibraryIndex：SQLite schema v1，按谱面相对路径、大小和修改时间缓存解析结果；
+事务更新，删除项和坏文件清出索引；未知迁移明确失败，不删除媒体。
+新增本地来源接口和 PreparedLocalSong，检查歌曲处于所属本地根目录。
+此接口目前为本地实现边界，未来服务器模型映射仍需要统一。
+
+实际构建 `:content-local:test :app:assembleDebug :app:assembleDebugAndroidTest
+:app:lintDebug` 通过，1m18s，lint 0 错误、23 警告。新增来源越界测试通过，
+本地内容测试现有 4 个方法。真实 API 35 模拟器安装平台测试 APK 后执行
+IndexInstrumentation，输出 `PASS: SQLite create/cache/reopen/change/bad-file/delete`。
+平台测试仅操作独立临时目录和独立数据库，未修改实际导入曲库。
+
+最新版同路径 APK 的 SHA-256 更新为：
+`4a228391d8347c2d8c4aff2acd26c0b3e6d9fa298643a569f4341e2127c0821e`。
+此前 6e10c3a 的 APK 校验值保留在上文作为历史记录。
+尚待真机目录提供者、飞行模式、导入中旋转/进程回收、存储不足和大曲库验证。
+仍不能据此宣称 A2 音频、触控或完整游戏验收通过。

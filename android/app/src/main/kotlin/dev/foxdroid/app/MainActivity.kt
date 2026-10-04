@@ -18,6 +18,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.ImageView
 import dev.foxdroid.local.LocalLibrary
+import dev.foxdroid.local.LocalContentSource
 import java.io.File
 import java.security.MessageDigest
 import java.util.concurrent.Executors
@@ -30,8 +31,11 @@ class MainActivity : Activity() {
     private var importStatus = ""
     private var pageGeneration = 0
     private val libraryRoot get() = File(filesDir, "library").apply { mkdirs() }
+    private val index by lazy { LibraryIndex(applicationContext) }
+    private val contentSource by lazy { LocalContentSource(libraryRoot, index::refresh) }
 
     override fun onDestroy() {
+        worker.execute { index.close() }
         worker.shutdown()
         super.onDestroy()
     }
@@ -105,7 +109,9 @@ class MainActivity : Activity() {
             val list = this
             val generation = pageGeneration
             worker.execute {
-                val scan = LocalLibrary.scan(libraryRoot)
+                val scan = try { contentSource.refresh() } catch (e: Exception) {
+                    dev.foxdroid.local.LibraryScan(emptyList(), listOf("索引读取失败，原曲包保留：${e.message}"))
+                }
                 val covers = scan.songs.associateWith { song ->
                     runCatching {
                         if (song.banner.isBlank()) null else {
@@ -139,7 +145,8 @@ class MainActivity : Activity() {
                                 setOnClickListener {
                                     worker.execute {
                                         val result = runCatching {
-                                            val audioFile = LocalLibrary.prepare(song, index)
+                                            val prepared = contentSource.prepare(song, index)
+                                            val audioFile = prepared.audioFile
                                             val extractor = MediaExtractor()
                                             try {
                                                 extractor.setDataSource(audioFile.path)
