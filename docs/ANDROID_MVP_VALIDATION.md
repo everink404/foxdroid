@@ -42,3 +42,7 @@ SHA-256：`7986cd0e88c91b970b77cf508c6f4e98ecf625b3ae9355dfd8da65f165005363`。
 
 APK：artifacts/android/foxdroid-mvp-20261004-live-debug.apk，0.4.2-mvp / versionCode 7。
 SHA-256：`97459a17762f8bf939583191bc2d92a52fd7984558e05ee614f60ccfedd7e190`。
+
+## 最小 MVP 收尾验收
+
+用户先确认 0.4.2“一切正常”，实时反馈真机检查通过；随后对中断检查、本地/NAS 整局、断网结算及关闭 NAS 后本地游玩的收尾清单确认“均已验收，没有问题”。上述项目记为通过（用户报告），取代此前对应待验收状态。0.4.2 固定为最小 MVP 基线；未新增自动测试、量化日志或双设备矩阵。基线与保留限制见 [ANDROID_MVP_BASELINE.md](./ANDROID_MVP_BASELINE.md)。
