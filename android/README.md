@@ -17,5 +17,6 @@
 Windows 使用 `gradlew.bat`。设置 `JAVA_HOME` 指向 JDK 17，并设置
 `ANDROID_HOME` 指向本机 SDK。Wrapper 固定 Gradle 8.11.1 并校验官方 SHA-256。
 Primary 的本地工具位于仓库根目录 `.tools/`（已忽略，不提交）。
+ A2 原生音频构建还需要 NDK 28.1.13356709 与 CMake 4.1.2。测试命令补充 `:content-local:test`；游玩原型的范围和限制见 [A2 验证](../docs/ANDROID_A2_VALIDATION.md)。
 构建验证记录见 [A0 验证](../docs/ANDROID_A0_VALIDATION.md)。
 两端共用资料位于 [`shared/`](../shared/README.md)，内容服务位于 [`docker/`](../docker/README.md)。

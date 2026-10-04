@@ -20,7 +20,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;28.1.13356709' 'cmake;4.1.2'
       - run: bash ./gradlew --no-daemon :content-model:test :content-local:test :game-core:test :app:assembleDebug :app:lintDebug
         working-directory: android
       - uses: actions/upload-artifact@v4

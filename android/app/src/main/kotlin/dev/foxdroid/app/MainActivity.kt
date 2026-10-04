@@ -51,6 +51,11 @@ class MainActivity : Activity() {
         else showLibrary()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!diagnosticsVisible) showLibrary()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putBoolean("diagnosticsVisible", diagnosticsVisible)
         super.onSaveInstanceState(outState)
@@ -96,6 +101,9 @@ class MainActivity : Activity() {
                 textSize = 18f
             })
             addView(Button(this@MainActivity).apply { text = "设备诊断"; setOnClickListener { showDiagnostics() } })
+            addView(Button(this@MainActivity).apply { text = "延迟偏移设置"; setOnClickListener { calibrationDialog() } })
+            val lastScore = getSharedPreferences("scores",MODE_PRIVATE).getString("last-result",null)
+            if (lastScore != null) addView(TextView(this@MainActivity).apply { text = "上次成绩：\n$lastScore" })
             addView(Button(this@MainActivity).apply {
                 text = "导入 ZIP 曲包"; isEnabled = !busy
                 setOnClickListener { startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -140,9 +148,11 @@ class MainActivity : Activity() {
                         }
                         song.charts.forEachIndexed { index, chart ->
                             list.addView(Button(this@MainActivity).apply {
-                                text = "${chart.difficulty} · ${chart.meter ?: "?"} · 准备谱面"
+                                text = "${chart.difficulty} · ${chart.meter ?: "?"} · 准备并游玩"
                                 isEnabled = !busy
                                 setOnClickListener {
+                                    busy = true
+                                    showLibrary()
                                     worker.execute {
                                         val result = runCatching {
                                             val prepared = contentSource.prepare(song, index)
@@ -154,9 +164,20 @@ class MainActivity : Activity() {
                                                     extractor.getTrackFormat(it).getString("mime")?.startsWith("audio/") == true
                                                 }) { "音频无法识别" }
                                             } finally { extractor.release() }
-                                            "${song.title}：谱面和音频已准备；游玩将在 A2 开放。"
+                                            val chart = prepared.chart
+                                            val chartFileName = "prepared-${System.nanoTime()}.json"
+                                            File(cacheDir, chartFileName).writeText(org.json.JSONObject().apply {
+                                                put("title",song.title); put("audio",audioFile.path)
+                                                put("timing",org.json.JSONObject(chart.timing)); put("notes",chart.notes)
+                                            }.toString())
+                                            "READY:$chartFileName"
                                         }.getOrElse { "准备失败：${it.message}" }
-                                        runOnUiThread { if (!isDestroyed) { importStatus = result; showLibrary() } }
+                                        runOnUiThread { if (!isDestroyed) {
+                                            busy = false
+                                            if (result.startsWith("READY:")) startActivity(Intent(this@MainActivity,GameActivity::class.java)
+                                                .putExtra("chartFile",result.removePrefix("READY:")))
+                                            else { importStatus = result; showLibrary() }
+                                        } }
                                     }
                                 }
                             })
@@ -186,6 +207,23 @@ class MainActivity : Activity() {
                 }
             }
         }
+    }
+
+    private fun calibrationDialog() {
+        val preferences = getSharedPreferences("game-settings",MODE_PRIVATE)
+        val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(40,20,40,20) }
+        val fields = listOf("audioOffsetMs" to "音频判定偏移", "inputOffsetMs" to "输入偏移", "visualOffsetMs" to "视觉偏移")
+            .associate { (key,label) ->
+                layout.addView(TextView(this).apply { text = "$label（毫秒，-250 至 250）" })
+                key to android.widget.EditText(this).apply {
+                    inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_SIGNED
+                    setText(preferences.getInt(key,0).toString()); layout.addView(this)
+                }
+            }
+        android.app.AlertDialog.Builder(this).setTitle("手动校准").setView(layout)
+            .setNegativeButton("取消",null).setPositiveButton("保存") { _,_ ->
+                preferences.edit().apply { fields.forEach { (key,field) -> putInt(key,(field.text.toString().toIntOrNull() ?: 0).coerceIn(-250,250)) } }.apply()
+            }.show()
     }
 
     @Deprecated("Platform file-picker result callback")
@@ -270,7 +308,7 @@ class MainActivity : Activity() {
                     "屏幕：${windowManager.defaultDisplay.refreshRate} Hz\n" +
                     "建议采样率：${audio.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE) ?: "未知"}\n" +
                     "建议缓冲帧数：${audio.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER) ?: "未知"}\n" +
-                    "可用输出：$outputs\n\n音频时钟、underrun 与触控时间戳：等待 A2 音频实验。"
+                    "可用输出：$outputs\n\nAAudio 播放时钟、underrun 与输入时间戳可在游玩界面查看；实际延迟待真机测量。"
             })
             addView(Button(this@MainActivity).apply { text = "返回曲库"; setOnClickListener { showLibrary() } })
         }

@@ -21,3 +21,4 @@ android/.tools/
 .gradle/
 local.properties
 .kotlin/
+.cxx/

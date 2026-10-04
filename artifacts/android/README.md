@@ -1,4 +1,17 @@
-# FoxDroid A0 真机验收包
+# FoxDroid Android 真机验收包
+
+## 最新 A2 游玩原型
+
+[下载 A2 APK](./foxdroid-a2-20261004-debug.apk?raw=true) ·
+[下载八秒原创测试曲包](./original-a2-test.zip?raw=true)
+
+版本 0.3.0-a2 / versionCode 3，可覆盖安装 A1。
+SHA-256：`2e4f418ee97949e4240a9c0410e86d918a08fd65e0e3143a10bd4df086700cf8`。
+
+导入测试 ZIP，选择“准备并游玩”，点击“开始 / 继续”。四条轨道支持触控，顶部可暂停；播放结束显示结算。
+请检查声音是否正常、四指同时输入、长按与连续点击、暂停续播、后台/锁屏恢复和结算页 underrun，并反馈截图。
+当前是 A2 原型：使用 Canvas、结束时计算判定，尚无实时计分和完整局内重建恢复。
+模拟器构建与离线结算通过；真机音频及多指尚待验收。详见 [A2 验证记录](../../docs/ANDROID_A2_VALIDATION.md)。
 
 ## 最新 A1 导入验收版
 
